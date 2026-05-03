@@ -3,13 +3,16 @@
 Converters to and from the ASDF format for photutils.psf.functional_models.
 """
 
-from . import _ASDF_ASTROPY_INSTALLED
+from ._asdf_astropy_compat import (_ASDF_ASTROPY_INSTALLED,
+                                   raise_if_no_asdf_astropy)
 
 if _ASDF_ASTROPY_INSTALLED:
     from asdf_astropy.converters.transform.core import (TransformConverterBase,
                                                         parameter_to_value)
 else:
-    TransformConverterBase = object
+    # alias Converter as TransformConverterBase to allow the below class
+    # definition to work when asdf-astropy is not installed
+    from asdf.extension import Converter as TransformConverterBase
 
 __all__ = ['AiryDiskPSFConverter']
 
@@ -41,3 +44,13 @@ class AiryDiskPSFConverter(TransformConverterBase):
             radius=node['radius'],
             bbox_factor=node['bbox_factor'],
         )
+
+    def to_yaml_tree(self, obj, tag, ctx):  # noqa: ARG002
+        raise_if_no_asdf_astropy('AiryDiskPSF')
+
+        return super().to_yaml_tree(obj, tag, ctx)
+
+    def from_yaml_tree(self, node, tag, ctx):  # noqa: ARG002
+        raise_if_no_asdf_astropy('AiryDiskPSF')
+
+        return super().from_yaml_tree(node, tag, ctx)

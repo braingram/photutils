@@ -5,6 +5,8 @@ Converters to and from the ASDF data format for photutils apertures.
 
 from asdf.extension import Converter
 
+from ._asdf_astropy_compat import raise_if_no_asdf_astropy
+
 __all__ = ['CircularApertureConverter']
 
 
@@ -17,6 +19,8 @@ class CircularApertureConverter(Converter):
     types = ('photutils.aperture.CircularAperture',)
 
     def to_yaml_tree(self, obj, tag, ctx):  # noqa: ARG002
+        raise_if_no_asdf_astropy('CircularAperture')
+
         if obj.positions.shape == (2,):
             pos = obj.positions.tolist()
         else:
@@ -28,6 +32,8 @@ class CircularApertureConverter(Converter):
         }
 
     def from_yaml_tree(self, node, tag, ctx):  # noqa: ARG002
+        raise_if_no_asdf_astropy('CircularAperture')
+
         from photutils.aperture import CircularAperture
 
         return CircularAperture(

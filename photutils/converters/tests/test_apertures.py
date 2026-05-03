@@ -3,6 +3,8 @@
 Tests for the photutils aperture converters.
 """
 
+import contextlib
+
 import asdf
 import numpy as np
 import pytest
@@ -16,15 +18,19 @@ apertures = [
 ]
 
 
-@pytest.mark.skipif(not _ASDF_ASTROPY_INSTALLED,
-                    reason='asdf-astropy is not installed')
 @pytest.mark.parametrize('aperture', apertures)
 def test_aperture_converters(tmp_path, aperture):
     """
     Test that the aperture converters can round-trip an aperture object.
     """
-    with asdf.AsdfFile() as af:
-        af['aperture'] = aperture
+    if _ASDF_ASTROPY_INSTALLED:
+        ctx = contextlib.nullcontext()
+    else:
+        pytest.raises(ImportError, match='asdf-astropy must be installed')
+
+    af = asdf.AsdfFile()
+    af['aperture'] = aperture
+    with ctx:
         af.write_to(tmp_path / 'aperture.asdf')
 
         with asdf.open(tmp_path / 'aperture.asdf') as af:
